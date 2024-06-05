@@ -1,6 +1,11 @@
 {
   "name": "vscode-linglong",
-  "displayName": "vscode-linglong",
+  "displayName": "linglong",
+  "publisher": "myml",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myml/vscode-linglong.git"
+  },
   "description": "",
   "version": "0.0.1",
   "engines": {
