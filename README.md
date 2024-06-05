@@ -1,71 +1,42 @@
-# vscode-linglong README
+# vscode 玲珑插件
 
-This is the README for your extension "vscode-linglong". After writing up a brief description, we recommend including the following sections.
+编写玲珑 linglong,yaml 文件
 
-## Features
+## 代码提示和校验
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+使用 schemas 实现 yaml 文件的代码提示和必填字段校验
 
-For example if there is an image subfolder under your extension project workspace:
+![image](./image.png)
 
-\!\[feature X\]\(images/feature-x.png\)
+## 依赖补全
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+在制作玲珑包时，如果 base 和 runtime 中缺少构建应用所需依赖，需要自己添加 deb 包，deb 包的依赖繁多，软件更新后，下载地址又会失效，插件提供了一种临时方案。
 
-## Requirements
+```yaml
+build: |
+  ...
+sources:
+  - kind: git
+    url: https://github.com/linuxdeepin/dde-calendar
+    commit: 5.13.1
+  # linglong:gen_deb_source sources arm64 https://pools.uniontech.com/deepin-beige beige main community
+  # linglong:gen_deb_source install libical-dev, wget
+```
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+将 sources 字段放在 linglong.yaml 的最后，然后在 sources 最后添加以上注释(将 libical-dev, wget 替换称你自己想安装的软件包)
 
-## Extension Settings
+第一个注释是用于设置软件源，只能写一次，第二个注释是用于安装依赖，可以写多次，例如`libical-dev, wget`可以分开写：
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+```
+# linglong:gen_deb_source install libical-dev
+# linglong:gen_deb_source install wget
+```
 
-For example:
+添加这两行注释后，在 vscode 中按`Ctrl+Shift+P` 搜索 `linglong: Gen deb sources`, 等待一段时间后，插件会自动将填写的依赖和其依赖树全部添加到当前 linglong.yaml 文件末尾，之后依赖有更新，可重复执行
+`linglong: Gen deb sources`命令来更新软件包
 
-This extension contributes the following settings:
+## FAQ
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+为什么按 `Ctrl+Shift+P` 无法搜索到相关命令
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+首先要确保当前 vscode 安装了本插件，其次要确定当前编辑器正打开着 linglong.yaml 文件

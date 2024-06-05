@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "BuilderProject",
+  "description": "Linglong project build file.",
+  "type": "object",
+  "required": ["version", "package", "build", "base"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "version of build file"
+    },
+    "package": {
+      "title": "BuilderProjectPackage",
+      "description": "package of build file",
+      "type": "object",
+      "required": ["id", "kind", "name", "version", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id of package"
+        },
+        "kind": {
+          "type": "string",
+          "description": "kind of package"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of package"
+        },
+        "version": {
+          "type": "string",
+          "description": "version of package"
+        },
+        "description": {
+          "type": "string",
+          "description": "description of package"
+        },
+        "architecture": {
+          "type": "string",
+          "description": "architecture of package"
+        },
+        "channel": {
+          "type": "string",
+          "description": "channel of package"
+        }
+      }
+    },
+    "runtime": {
+      "type": "string",
+      "description": "used runtime of package"
+    },
+    "base": {
+      "type": "string",
+      "description": "used base of package"
+    },
+    "sources": {
+      "type": "array",
+      "description": "sources of package",
+      "items": {
+        "title": "BuilderProjectSource",
+        "description": "items of sources of builder project",
+        "type": "object",
+        "required": ["kind"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "kind of source"
+          },
+          "url": {
+            "type": "string",
+            "description": "url of source"
+          },
+          "digest": {
+            "type": "string",
+            "description": "digest of source"
+          },
+          "commit": {
+            "type": "string",
+            "description": "commit of source"
+          },
+          "version": {
+            "type": "string",
+            "description": "version of source"
+          },
+          "name": {
+            "type": "string",
+            "description": "name of source"
+          }
+        }
+      }
+    },
+    "build": {
+      "title": "BuilderProjectBuildScript",
+      "description": "build script of builder project",
+      "type": "string"
+    },
+    "command": {
+      "type": "array",
+      "description": "command of builder project",
+      "items": {
+        "type": "string"
+      }
+    },
+    "strip": {
+      "title": "BuilderProjectStripScript",
+      "description": "strip script of builder project",
+      "type": "string"
+    }
+  }
+}

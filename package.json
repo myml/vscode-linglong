@@ -14,8 +14,14 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-linglong.helloWorld",
-        "title": "Hello World"
+        "command": "dev.linglong.extension.gen_deb_source",
+        "title": "linglong: Gen deb sources"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": "linglong.yaml",
+        "url": "./schemas/linglong.schema.json"
       }
     ]
   },
