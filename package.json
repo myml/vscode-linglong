@@ -6,8 +6,9 @@
     "type": "git",
     "url": "https://github.com/myml/vscode-linglong.git"
   },
+  "icon": "logo.png",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -21,12 +22,35 @@
       {
         "command": "dev.linglong.extension.gen_deb_source",
         "title": "linglong: Gen deb sources"
+      },
+      {
+        "command": "dev.linglong.extension.build",
+        "title": "linglong: Build"
+      },
+      {
+        "command": "dev.linglong.extension.build.offline",
+        "title": "linglong: Offline Build"
+      },
+      {
+        "command": "dev.linglong.extension.run",
+        "title": "linglong: Run"
+      },
+      {
+        "command": "dev.linglong.extension.export",
+        "title": "linglong: Export"
       }
     ],
     "yamlValidation": [
       {
         "fileMatch": "linglong.yaml",
-        "url": "./schemas/linglong.schema.json"
+        "url": "./schemas/linglong.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "yaml",
+        "fileMatch": "linglong.yaml",
+        "path": "./snippets/linglong.json"
       }
     ]
   },

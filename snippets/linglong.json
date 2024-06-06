@@ -1,0 +1,16 @@
+{
+  "linglong:gen_deb_source sources": {
+    "scope": "yaml",
+    "prefix": "ll:src",
+    "body": [
+      "# linglong:gen_deb_source sources amd64 https://pools.uniontech.com/deepin-beige beige main community"
+    ],
+    "description": "linglong gen deb source"
+  },
+  "linglong:gen_deb_source install": {
+    "scope": "yaml",
+    "prefix": "ll:in",
+    "body": ["# linglong:gen_deb_source install $1"],
+    "description": "linglong gen deb source"
+  }
+}

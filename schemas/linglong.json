@@ -92,7 +92,8 @@
     "build": {
       "title": "BuilderProjectBuildScript",
       "description": "build script of builder project",
-      "type": "string"
+      "type": "string",
+      "contentMediaType": "text/x-sh"
     },
     "command": {
       "type": "array",
