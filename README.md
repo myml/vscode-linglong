@@ -1,16 +1,22 @@
 # vscode 玲珑插件
 
-编写玲珑 linglong,yaml 文件
+辅助编写玲珑 linglong.yaml 文件
+
+## 玲珑是什么
+
+玲珑是一种新型的独立包管理工具集，致力于治理 Linux 系统下传统软件包格式复杂、交叉的依赖关系导致的各种兼容性问题，以及过于松散的权限管控导致的安全风险。
+
+玲珑的官方网站是 https://linglong.dev
 
 ## 代码提示和校验
 
-使用 schemas 实现 yaml 文件的代码提示和必填字段校验
+使用 schemas 实现 linglong.yaml 文件的代码提示和必填字段校验
 
 ![image](./image.png)
 
-## 依赖补全
+## 依赖更新
 
-在制作玲珑包时，如果 base 和 runtime 中缺少构建应用所需依赖，需要自己添加 deb 包，deb 包的依赖繁多，软件更新后下载地址又会失效，插件提供了一种临时方案。
+在制作玲珑包时，如果 base 和 runtime 中缺少构建应用所需依赖，需要自己添加 deb 包，deb 包的依赖繁多，软件更新后下载地址又会失效，插件提供了一种自动更新 deb 包 依赖的功能。
 
 ### 第一步
 
@@ -46,11 +52,11 @@ sources:
 
 ### 第三步
 
-`linglong: Gen deb sources` 命令同时会下载一个 `install_dep`脚本到工作目录，在 linglong.yaml 的 `build`字段添加 `bash ./install_dep linglong/sources "$PREFIX"`用来在构建玲珑包时安装 deb 包
+`linglong: Gen deb sources` 命令还会下载一个 `install_dep`脚本到工作目录，在 linglong.yaml 的 `build`字段添加 `bash ./install_dep linglong/sources "$PREFIX"`用来在构建玲珑包时安装 deb 包
 
 ## dsc 更新
 
-在制作玲珑包时，可能需要从 deb 仓库下载源码用于构建，玲珑提供了 dsc source 功能，例如在 linglong.yaml 中添加以下 source，玲珑在构建时会使用 dget 下载源码，但是 dsc 同 deb 一样容易失效，插件提供了自动更新 dsc sources 的功能
+在制作玲珑包时，可能需要从 deb 仓库下载源码用于构建，玲珑提供了 dsc source 功能，例如在 linglong.yaml 中添加以下 source，玲珑在构建时会使用 dget 下载源码
 
 ```
   - kind: dsc
@@ -59,7 +65,9 @@ sources:
     digest: b10b9e502c65145f7b54b691ce8ffc62400abd05898f37a803bc9af76ea55508
 ```
 
-请在 sources 添加一下注释，注意 dsc_source 的注释要添加到 deb_source 的前面，避免被覆盖
+但是 dsc 同 deb 一样下载容易失效，插件提供了自动更新 dsc source 的功能
+
+请在 sources 添加一下注释，注意 gen_dsc_source 的注释要添加到 gen_deb_source 的前面，避免被覆盖
 
 ```
   # linglong:gen_dsc_source sources https://pools.uniontech.com/deepin-beige beige main
