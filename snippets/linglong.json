@@ -1,15 +1,29 @@
 {
   "linglong:gen_deb_source sources": {
-    "scope": "yaml",
-    "prefix": "ll:src",
+    "scope": "linglong.yaml",
+    "prefix": "ll:deb:src",
     "body": [
       "# linglong:gen_deb_source sources amd64 https://pools.uniontech.com/deepin-beige beige main community"
     ],
     "description": "linglong gen deb source"
   },
   "linglong:gen_deb_source install": {
-    "scope": "yaml",
-    "prefix": "ll:in",
+    "scope": "linglong.yaml",
+    "prefix": "ll:deb:in",
+    "body": ["# linglong:gen_deb_source install $1"],
+    "description": "linglong gen deb source"
+  },
+  "linglong:gen_dsc_source sources": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:dsc:src",
+    "body": [
+      "# linglong:gen_deb_source sources amd64 https://pools.uniontech.com/deepin-beige beige main community"
+    ],
+    "description": "linglong gen deb source"
+  },
+  "linglong:gen_dsc_source install": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:dsc:in",
     "body": ["# linglong:gen_deb_source install $1"],
     "description": "linglong gen deb source"
   }
