@@ -243,7 +243,7 @@ export async function gen_dsc_source(context: vscode.ExtensionContext) {
   }
   await document.save();
   let dependFile = path.join(tempDir, "dsc.list");
-  await fs.writeFile(dependFile, depends.join("\n"));
+  await fs.writeFile(dependFile, depends.join("\n") + "\n");
 
   const terminal = vscode.window.createTerminal(`Ext Terminal`);
   terminal.sendText(
