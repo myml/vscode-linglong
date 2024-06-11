@@ -8,7 +8,7 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -77,5 +77,7 @@
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
   },
-  "dependencies": {}
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ]
 }
