@@ -3,7 +3,7 @@
     "scope": "linglong.yaml",
     "prefix": "ll:deb:src",
     "body": [
-      "# linglong:gen_deb_source sources amd64 https://pools.uniontech.com/deepin-beige beige main community"
+      "# linglong:gen_deb_source sources amd64 https://mirrors.ustc.edu.cn/deepin/beige beige main community"
     ],
     "description": "linglong gen deb source"
   },
@@ -17,7 +17,7 @@
     "scope": "linglong.yaml",
     "prefix": "ll:dsc:src",
     "body": [
-      "# linglong:gen_deb_source sources amd64 https://pools.uniontech.com/deepin-beige beige main community"
+      "# linglong:gen_deb_source sources amd64 https://mirrors.ustc.edu.cn/deepin/beige beige main community"
     ],
     "description": "linglong gen deb source"
   },

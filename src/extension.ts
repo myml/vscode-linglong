@@ -87,30 +87,40 @@ export async function gen_deb_source() {
           .trim();
         const [arch, url, distribution, ...components] = sources.split(" ");
         const tempFilePath = path.join(tempDir, "get_deb_source.sh");
-        const content = `#!/bin/bash
-                set -e
-                # 去掉 [*] 和 <*> 便于从 deb 复制 Build-Depends
-                pkgs=$(cat /dev/stdin | sed "s#\\[[^]]\\+]##g" | sed "s# <\\w\\+># #g" | tr ',' '|')
-    
-                url=${url}
-                distribution=${distribution}
-                components="${components.join(" ")}"
-                arch=${arch}
-    
-          rm -rf ~/.aptly
-          aptly mirror create -ignore-signatures -architectures=$arch -filter="$pkgs" -filter-with-deps linglong-download-depend $url $distribution $components > /dev/null
-          aptly mirror update -ignore-signatures linglong-download-depend > download.log
-
-          grep 'Success downloading' download.log|grep 'deb$'|awk '{print $3}'|sort|while IFS= read -r url; do
-              filename=$(basename "$url")
-              filepath=$(find ~/.aptly/pool|grep "\\_$filename")
-              digest=$(sha256sum "$filepath"|awk '{print $1}')
-              echo "  - kind: file"
-              echo "    url: $url"
-              echo "    digest: $digest"
-          done
-
-          rm download.log`;
+        const content = String.raw`#!/bin/bash
+        set -e
+        
+        outputFile=$1
+        tmpDir=$(mktemp -d)
+        tmpMirror="linglong-download-depend"
+        
+        url=${url}
+        distribution=${distribution}
+        components="${components.join(" ")}"
+        arch=${arch}
+        # 去掉 [*] 和 <*> 便于从 deb 复制 Build-Depends
+        pkgs=$(cat /dev/stdin | sed "s#\[[^]]\+]##g" | sed "s# <\w\+># #g" | tr ',' '|')
+        
+        aptly mirror drop "$tmpMirror" || true
+        aptly mirror create -ignore-signatures -architectures=$arch -filter="$pkgs" -filter-with-deps "$tmpMirror" $url $distribution $components
+        aptly mirror update -ignore-signatures "$tmpMirror"
+        
+        for component in $components;do
+            curl "$url/dists/$distribution/$component/binary-$arch/Packages" | grep ^Filename >> "$tmpDir/Filename.list"
+        done
+        
+        aptly mirror search -format "{{.Filename}} {{.SHA256}}" "$tmpMirror" | while IFS= read -r line; do
+            arr=($line)
+            download_url=$(grep "${"${arr[0]}"}" "$tmpDir/Filename.list" | head -n 1 | awk "{print \"$url/\"\$2}")
+            {
+                echo "  - kind: file"
+                echo "    url: $download_url"
+                echo "    digest: ${"${arr[1]}"}" 
+            } >> "$outputFile"
+        done
+        
+        aptly mirror drop "$tmpMirror"
+        rm -r "$tmpDir"`;
         await fs.writeFile(tempFilePath, content);
         scriptFile = tempFilePath;
         break;
@@ -144,7 +154,7 @@ export async function gen_deb_source() {
   const terminal = vscode.window.createTerminal(`Ext Terminal`);
   terminal.sendText(`wget -N ${installdepUrl}\n`);
   terminal.sendText(
-    `cat ${dependFile} | bash ${scriptFile} >> ${document.fileName}\n`
+    `cat ${dependFile} | bash ${scriptFile} ${document.fileName}\n`
   );
   terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
   terminal.show();
