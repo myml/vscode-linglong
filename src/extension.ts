@@ -111,7 +111,7 @@ export async function gen_deb_source() {
         
         aptly mirror search -format "{{.Filename}} {{.SHA256}}" "$tmpMirror" | while IFS= read -r line; do
             arr=($line)
-            download_url=$(grep "${"${arr[0]}"}" "$tmpDir/Filename.list" | head -n 1 | awk "{print \"$url/\"\$2}")
+            download_url=$(grep "/${"${arr[0]}"}$" "$tmpDir/Filename.list" | head -n 1 | awk "{print \"$url/\"\$2}")
             {
                 echo "  - kind: file"
                 echo "    url: $download_url"
@@ -262,6 +262,6 @@ export async function gen_dsc_source(context: vscode.ExtensionContext) {
     }r/dev/stdin' ${document.fileName}`
   );
   // 避免sed不触发vscode重新加载
-  terminal.sendText(`echo "">> linglong.yaml`);
+  terminal.sendText(`echo "">> ${document.fileName}`);
   terminal.show();
 }
