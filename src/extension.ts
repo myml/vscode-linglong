@@ -106,7 +106,7 @@ export async function gen_deb_source() {
         aptly mirror update -ignore-signatures "$tmpMirror"
         
         for component in $components;do
-            curl "$url/dists/$distribution/$component/binary-$arch/Packages" | grep ^Filename >> "$tmpDir/Filename.list"
+            curl -L "$url/dists/$distribution/$component/binary-$arch/Packages" | grep ^Filename >> "$tmpDir/Filename.list"
         done
         
         aptly mirror search -format "{{.Filename}} {{.SHA256}}" "$tmpMirror" | while IFS= read -r line; do

@@ -20,7 +20,7 @@
 
 ### 第一步
 
-需要安装 aptly 这个命令行工具，下载地址 https://www.aptly.info/download/。
+需要安装 aptly 这个命令行工具，下载地址 https://www.aptly.info/download/ 。
 
 ### 第二步
 
