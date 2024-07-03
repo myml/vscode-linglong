@@ -66,6 +66,7 @@ async function builderExport() {
 }
 
 export async function gen_deb_source() {
+  console.log("run gen_deb_source");
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
@@ -139,15 +140,17 @@ export async function gen_deb_source() {
   let dependFile = "";
   dependFile = path.join(tempDir, "depends.list");
   await fs.writeFile(dependFile, depends.join(","));
-
   // 删除选中行到文件尾部的内容
-  const start = document.lineAt(endline + 1).range.start;
-  const end = document.lineAt(document.lineCount - 1).range.end;
-  const range = new vscode.Range(start, end);
-  await editor.edit((editBuilder) => {
-    editBuilder.delete(range);
-  });
-  document.save();
+  if (document.lineCount - 1 !== endline) {
+    console.log(endline, document.lineCount);
+    const start = document.lineAt(endline + 1).range.start;
+    const end = document.lineAt(document.lineCount - 1).range.end;
+    const range = new vscode.Range(start, end);
+    await editor.edit((editBuilder) => {
+      editBuilder.delete(range);
+    });
+    document.save();
+  }
 
   const installdepUrl =
     "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
@@ -161,6 +164,7 @@ export async function gen_deb_source() {
 }
 
 export async function gen_dsc_source(context: vscode.ExtensionContext) {
+  console.log("run gen_dsc_source");
   const tempDir = os.tmpdir();
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
@@ -191,13 +195,13 @@ export async function gen_dsc_source(context: vscode.ExtensionContext) {
           
           url=${url}
           distribution=${distribution}
-          components="${components}"
+          components="${components.join(" ")}"
           
           tmpdir=$(mktemp -d)
           cd "$tmpdir"
           # 下载Sources文件
           for component in $components;do
-              curl -s "$url/dists/$distribution/$component/source/Sources.gz" | gunzip >> Sources
+              curl -Ls "$url/dists/$distribution/$component/source/Sources.gz" | gunzip >> Sources
           done;
           
           while IFS= read -r pkg; do
