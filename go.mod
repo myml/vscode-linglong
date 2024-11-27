@@ -1,6 +1,6 @@
 module vscode-linglong
 
-go 1.22.1
+go 1.20
 
 require github.com/aptly-dev/aptly v1.5.0
 
