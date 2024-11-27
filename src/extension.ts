@@ -72,95 +72,16 @@ export async function gen_deb_source() {
     return;
   }
   const document = editor.document;
-  // 构建临时文件的路径
-  const tempDir = os.tmpdir();
-  const text = document.getText();
-
-  let endline = document.lineCount;
-  let depends = [] as string[];
-  let scriptFile = "";
-  for (let [index, line] of text.split("\n").entries()) {
-    line = line.trimStart();
-    switch (true) {
-      case line.startsWith("# linglong:gen_deb_source sources"):
-        const sources = line
-          .slice("# linglong:gen_deb_source sources".length)
-          .trim();
-        const [arch, url, distribution, ...components] = sources.split(" ");
-        const tempFilePath = path.join(tempDir, "get_deb_source.sh");
-        const content = String.raw`#!/bin/bash
-        set -e
-        
-        outputFile=$1
-        tmpDir=$(mktemp -d)
-        tmpMirror="linglong-download-depend"
-        
-        url=${url}
-        distribution=${distribution}
-        components="${components.join(" ")}"
-        arch=${arch}
-        # 去掉 [*] 和 <*> 便于从 deb 复制 Build-Depends
-        pkgs=$(cat /dev/stdin | sed "s#\[[^]]\+]##g" | sed "s# <\w\+># #g" | tr ',' '|')
-        
-        aptly mirror drop "$tmpMirror" || true
-        aptly mirror create -ignore-signatures -architectures=$arch -filter="$pkgs" -filter-with-deps "$tmpMirror" $url $distribution $components
-        aptly mirror update -ignore-signatures "$tmpMirror"
-        
-        for component in $components;do
-            curl -L "$url/dists/$distribution/$component/binary-$arch/Packages" | grep ^Filename >> "$tmpDir/Filename.list"
-        done
-        
-        aptly mirror search -format "{{.Filename}} {{.SHA256}}" "$tmpMirror" | while IFS= read -r line; do
-            arr=($line)
-            download_url=$(grep "/${"${arr[0]}"}$" "$tmpDir/Filename.list" | head -n 1 | awk "{print \"$url/\"\$2}")
-            {
-                echo "  - kind: file"
-                echo "    url: $download_url"
-                echo "    digest: ${"${arr[1]}"}" 
-            } >> "$outputFile"
-        done
-        
-        aptly mirror drop "$tmpMirror"
-        rm -r "$tmpDir"`;
-        await fs.writeFile(tempFilePath, content);
-        scriptFile = tempFilePath;
-        break;
-      case line.startsWith("# linglong:gen_deb_source install"):
-        endline = index;
-        depends.push(line.slice("# linglong:gen_deb_source install".length));
-        break;
-    }
+  const ext = vscode.extensions.getExtension("myml.vscode-linglong");
+  if (ext) {
+    const installdepUrl =
+      "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
+    const terminal = vscode.window.createTerminal(`gen deb`);
+    terminal.sendText(`wget -N ${installdepUrl}\n`);
+    terminal.sendText(`${ext.extensionPath + "/tools"} ${document.fileName}\n`);
+    terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
+    terminal.show();
   }
-  if (!scriptFile) {
-    return;
-  }
-  if (!depends) {
-    return;
-  }
-  let dependFile = "";
-  dependFile = path.join(tempDir, "depends.list");
-  await fs.writeFile(dependFile, depends.join(","));
-  // 删除选中行到文件尾部的内容
-  if (document.lineCount - 1 !== endline) {
-    console.log(endline, document.lineCount);
-    const start = document.lineAt(endline + 1).range.start;
-    const end = document.lineAt(document.lineCount - 1).range.end;
-    const range = new vscode.Range(start, end);
-    await editor.edit((editBuilder) => {
-      editBuilder.delete(range);
-    });
-    document.save();
-  }
-
-  const installdepUrl =
-    "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
-  const terminal = vscode.window.createTerminal(`Ext Terminal`);
-  terminal.sendText(`wget -N ${installdepUrl}\n`);
-  terminal.sendText(
-    `cat ${dependFile} | bash ${scriptFile} ${document.fileName}\n`
-  );
-  terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
-  terminal.show();
 }
 
 export async function gen_dsc_source(context: vscode.ExtensionContext) {

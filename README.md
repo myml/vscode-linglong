@@ -20,7 +20,9 @@
 
 ### 第一步
 
-需要安装 aptly 这个命令行工具，下载地址 https://www.aptly.info/download/ 。
+~~需要安装 aptly 这个命令行工具，下载地址 https://www.aptly.info/download/ 。~~
+
+从插件 0.1.0 版本开始内嵌命令行工具，不再需要安装 aptly
 
 ### 第二步
 
@@ -53,6 +55,12 @@ sources:
 ### 第三步
 
 `linglong: Gen deb sources` 命令还会下载一个 `install_dep`脚本到工作目录，在 linglong.yaml 的 `build`字段添加 `bash ./install_dep linglong/sources "$PREFIX"`用来在构建玲珑包时安装 deb 包
+
+```yaml
+build: |
+  bash ./install_dep linglong/sources $PREFIX
+  xxx
+```
 
 ## dsc 更新
 
