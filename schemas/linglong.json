@@ -106,6 +106,34 @@
       "title": "BuilderProjectStripScript",
       "description": "strip script of builder project",
       "type": "string"
+    },
+    "buildext": {
+      "title": "BuilderProjectBuildExtScript",
+      "description": "build ext script of builder project",
+      "type": "object",
+      "properties": {
+        "apt": {
+          "title": "BuilderProjectBuildExtAptScript",
+          "description": "build ext apt script of builder project",
+          "type": "object",
+          "properties": {
+            "build_depends": {
+              "type": "array",
+              "description": "build depends of build ext apt script",
+              "items": {
+                "type": "string"
+              }
+            },
+            "depends": {
+              "type": "array",
+              "description": "depends of build ext apt script",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
