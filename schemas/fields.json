@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "package": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]+\\.[a-zA-Z0-9\\.-]+$",
+          "description": "建议倒置域名"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "base": {
+      "type": "string",
+      "pattern": "/\\d+\\.\\d+\\.\\d+$"
+    },
+    "runtime": {
+      "type": "string",
+      "pattern": "/\\d+\\.\\d+\\.\\d+$"
+    }
+  }
+}

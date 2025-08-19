@@ -1,4 +1,26 @@
 {
+  "linglong:version:v1": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:version",
+    "body": [
+      "version: '1'",
+      "package:",
+      "  id: $1",
+      "  name: your name",
+      "  version: 0.0.0.1",
+      "  kind: app",
+      "  description: |",
+      "    your description",
+      "",
+      "command: [echo, -e, hello world]",
+      "",
+      "base: org.deepin.base/23.1.0",
+      "",
+      "build: |",
+      "  echo 'hello' #some operation to build this project"
+    ],
+    "description": "a template"
+  },
   "linglong:gen_deb_source sources": {
     "scope": "linglong.yaml",
     "prefix": "ll:deb:src",
@@ -26,5 +48,71 @@
     "prefix": "ll:dsc:in",
     "body": ["# linglong:gen_dsc_source install $1"],
     "description": "linglong gen deb source"
-  }
+  },
+  "linglong:buildext:apt": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:buildext:apt",
+    "body": [
+      "buildext:",
+      " apt:",
+      "  build_depends:",
+      "    - $1",
+      "  depends:",
+      "    - $2"
+    ]
+  },
+  "linglong:base:20": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:base&runtime",
+    "body": [
+      "base: org.deepin.foundation/20.0.0",
+      "runtime: org.deepin.Runtime/20.0.0"
+    ]
+  },
+  "linglong:base:23": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:base&runtime",
+    "body": [
+      "base: org.deepin.base/23.1.0",
+      "runtime: org.deepin.Runtime/23.1.0"
+    ]
+  },
+  "linglong:base:25": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:base&runtime",
+    "body": [
+      "base: org.deepin.base/25.2.0",
+      "runtime: org.deepin.runtime.dtk/25.2.0"
+    ]
+  },
+  "linglong:base:25:webengine": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:base&runtime",
+    "body": [
+      "base: org.deepin.base/25.2.0",
+      "runtime: org.deepin.runtime.webengine/25.2.0"
+    ]
+  },
+  "linglong:build:cmake": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:build:cmake",
+    "body": [
+      "build: |",
+      "  rm -rf build || true",
+      "  mkdir build && cd build",
+      "  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ..",
+      "  make -j && make install"
+    ]
+  },
+  "linglong:build:qmake": {
+    "scope": "linglong.yaml",
+    "prefix": "ll:build:cmake",
+    "body": [
+      "build: |",
+      "  rm -rf build || true",
+      "  mkdir build && cd build",
+      "  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ..",
+      "  make -j && make install"
+    ]},
+  "linglong:build:appimage": {}
 }

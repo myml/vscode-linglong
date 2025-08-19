@@ -78,7 +78,7 @@ export async function gen_deb_source() {
       "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
     const terminal = vscode.window.createTerminal(`gen deb`);
     terminal.sendText(`wget -N ${installdepUrl}\n`);
-    terminal.sendText(`${ext.extensionPath + "/tools"} ${document.fileName}\n`);
+    terminal.sendText(`${ext.extensionPath + "/out/tools-"+process.arch} ${document.fileName}\n`);
     terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
     terminal.show();
   }

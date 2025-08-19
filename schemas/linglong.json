@@ -9,6 +9,20 @@
       "type": "string",
       "description": "version of build file"
     },
+    "exclude": {
+      "type": "array",
+      "description": "exclude files during exporting UAB. Every item should be absolute path in container. It could be a directory or a regular file. e.g. - /usr/share/locale (exclude all files which in this directory) - /usr/lib/libavfs.a (exclude one file)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "include": {
+      "type": "array",
+      "description": "include files during exporting UAB. For example, the packer can declare a file/directory (e.g. /usr/share/locale/zh_CN) in the excluded directory (e.g. /usr/share/locale)  to exclude all files in /usr/share/locale except /usr/share/locale/zh_CN.",
+      "items": {
+        "type": "string"
+      }
+    },
     "package": {
       "title": "BuilderProjectPackage",
       "description": "package of build file",
@@ -42,6 +56,24 @@
         "channel": {
           "type": "string",
           "description": "channel of package"
+        },
+        "extension_of": {
+          "type": "string",
+          "description": "extension of whom"
+        },
+        "libs": {
+          "description": "extra ld search path",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env": {
+          "description": "Predefined environment variables when the extension is applied",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
@@ -92,8 +124,34 @@
     "build": {
       "title": "BuilderProjectBuildScript",
       "description": "build script of builder project",
-      "type": "string",
-      "contentMediaType": "text/x-sh"
+      "type": "string"
+    },
+    "buildext": {
+      "title": "BuilderProjectBuildExt",
+      "description": "build extension for builder project",
+      "type": "object",
+      "properties": {
+        "apt": {
+          "description": "build extension for apt",
+          "type": "object",
+          "properties": {
+            "build_depends": {
+              "description": "packages to be installed in build environment before build starting",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "depends": {
+              "description": "packages to be installed in runtime environment",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     },
     "command": {
       "type": "array",
@@ -107,29 +165,26 @@
       "description": "strip script of builder project",
       "type": "string"
     },
-    "buildext": {
-      "title": "BuilderProjectBuildExtScript",
-      "description": "build ext script of builder project",
-      "type": "object",
-      "properties": {
-        "apt": {
-          "title": "BuilderProjectBuildExtAptScript",
-          "description": "build ext apt script of builder project",
-          "type": "object",
-          "properties": {
-            "build_depends": {
-              "type": "array",
-              "description": "build depends of build ext apt script",
-              "items": {
-                "type": "string"
-              }
-            },
-            "depends": {
-              "type": "array",
-              "description": "depends of build ext apt script",
-              "items": {
-                "type": "string"
-              }
+    "modules": {
+      "title": "BuilderProjectModules",
+      "description": "Specify how to split application into modules.\n",
+      "type": "array",
+      "items": {
+        "title": "BuilderProjectModules",
+        "description": "items of modules of builder project",
+        "type": "object",
+        "required": ["name", "files"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "module name"
+          },
+          "files": {
+            "type": "array",
+            "description": "module install files",
+            "items": {
+              "type": "string",
+              "description": "module install file"
             }
           }
         }
