@@ -22,7 +22,12 @@ import (
 )
 
 func main() {
-	err := gen(os.Args[1])
+	linglongYaml := os.Args[1]
+	packageList := ""
+	if len(os.Args) > 2 {
+		packageList = os.Args[2]
+	}
+	err := gen(linglongYaml, packageList)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,12 +35,20 @@ func main() {
 
 var GenDebSource = "# linglong:gen_deb_source "
 
-func gen(filename string) error {
-	data, err := os.ReadFile(filename)
+func gen(linglongYaml string, packageList string) error {
+	data, err := os.ReadFile(linglongYaml)
 	if err != nil {
-		return fmt.Errorf("read file: %w", err)
+		return fmt.Errorf("read %s file: %w", linglongYaml, err)
 	}
 	lines := bytes.Split(data, []byte{'\n'})
+	var existsPkgs []string
+	if len(packageList) > 0 {
+		data, err = os.ReadFile(packageList)
+		if err != nil {
+			return fmt.Errorf("read %s file: %w", packageList, err)
+		}
+		existsPkgs = strings.Split(string(data), "\n")
+	}
 	var endLine int
 	var arch, repoUrl, codename string
 	var components, filter []string
@@ -61,23 +74,35 @@ func gen(filename string) error {
 		}
 	}
 
-	pkg, err := getPkg(arch, repoUrl, codename, components, strings.Join(filter, "|"))
+	pkgs, err := getPkg(arch, repoUrl, codename, components, strings.Join(filter, "|"))
 	if err != nil {
 		return err
 	}
 	lines = lines[:endLine+1]
-	sort.SliceStable(pkg, func(i, j int) bool {
-		c := strings.Compare(pkg[i].File.Filename, pkg[j].File.Filename)
+	sort.SliceStable(pkgs, func(i, j int) bool {
+		c := strings.Compare(pkgs[i].File.Filename, pkgs[j].File.Filename)
 		return c < 0
 	})
-	for i := range pkg {
+	for i := range pkgs {
+		exists := false
+		for j := range existsPkgs {
+			pkgName := pkgs[i].File.Filename
+			pkgName = pkgName[:strings.Index(pkgName, "_")]
+			if strings.Contains(existsPkgs[j], pkgName) {
+				exists = true
+				break
+			}
+		}
+		if exists {
+			continue
+		}
 		source := fmt.Sprintf("  - kind: file\n    url: %s/%s\n    digest: %s",
-			repoUrl, pkg[i].File.DownloadURL(), pkg[i].File.Checksums.SHA256,
+			repoUrl, pkgs[i].File.DownloadURL(), pkgs[i].File.Checksums.SHA256,
 		)
 		lines = append(lines, []byte(source))
 	}
 	data = bytes.Join(lines, []byte{'\n'})
-	err = os.WriteFile(filename, data, 0600)
+	err = os.WriteFile(linglongYaml, data, 0600)
 	if err != nil {
 		return fmt.Errorf("save file: %w", err)
 	}

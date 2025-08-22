@@ -18,6 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
       gen_deb_source
     )
   );
+  // deb source转buildext
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "dev.linglong.extension.deb_source_to_buildext",
+      debsource2buildext
+    )
+  );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "dev.linglong.extension.build",
@@ -66,22 +73,91 @@ async function builderExport() {
 }
 
 export async function gen_deb_source() {
+  const config = vscode.workspace.getConfiguration();
+  const option = {
+    skip: config.get("linglong.gen_deb_source.skip"),
+  };
+
   console.log("run gen_deb_source");
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
   }
+  // ll-builder build --skip-pull-depend -- sh -c "cat /packages.list /runtime/packages.list > packages.list"
   const document = editor.document;
   const ext = vscode.extensions.getExtension("myml.vscode-linglong");
   if (ext) {
     const installdepUrl =
       "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
     const terminal = vscode.window.createTerminal(`gen deb`);
-    terminal.sendText(`wget -N ${installdepUrl}\n`);
-    terminal.sendText(`${ext.extensionPath + "/out/tools-"+process.arch} ${document.fileName}\n`);
+    terminal.sendText(` wget -N ${installdepUrl}\n`);
+    if (option.skip) {
+      const randomDirName = Math.random().toString(36).substring(7);
+      const dirpath = path.join(os.tmpdir(), randomDirName);
+      await vscode.workspace.fs.createDirectory(vscode.Uri.file(dirpath));
+      terminal.sendText(
+        [
+          " ll-builder",
+          "build",
+          "--skip-commit-output",
+          "--skip-fetch-source",
+          "--",
+          "sh",
+          "-c",
+          `"cat /packages.list /runtime/packages.list > ${dirpath}/packages.list"`,
+        ].join(" ") + "\n"
+      );
+      terminal.sendText(
+        [
+          " " + ext.extensionPath + "/out/tools-" + process.arch,
+          document.fileName,
+          dirpath + "/packages.list",
+        ].join(" ") + "\n"
+      );
+    } else {
+      terminal.sendText(
+        [
+          " " + ext.extensionPath + "/out/tools-" + process.arch,
+          document.fileName,
+        ].join(" ") + "\n"
+      );
+    }
     terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
     terminal.show();
   }
+}
+
+export async function debsource2buildext(context: vscode.ExtensionContext) {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+  const document = editor.document;
+  const text = document.getText();
+  const lines = text.split("\n");
+  const pkgs = new Array<string>();
+  lines.forEach((line) => {
+    line = line.trimStart();
+    if (!line.startsWith("# linglong:gen_deb_source install")) {
+      return;
+    }
+    line
+      .slice("# linglong:gen_deb_source install".length)
+      .split(",")
+      .map((pkg) => pkgs.push(pkg));
+  });
+  pkgs.sort();
+  await editor.edit((editBuilder) => {
+    editBuilder.insert(
+      editor.selection.active,
+      [
+        "buildext:",
+        " apt:",
+        "  build_depends:",
+        ...pkgs.map((pkg) => "    - " + pkg),
+      ].join("\n")
+    );
+  });
 }
 
 export async function gen_dsc_source(context: vscode.ExtensionContext) {

@@ -8,7 +8,7 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -26,6 +26,10 @@
       {
         "command": "dev.linglong.extension.gen_dsc_source",
         "title": "linglong: Gen dsc sources"
+      },
+      {
+        "command": "dev.linglong.extension.deb_source_to_buildext",
+        "title": "linglong: DEB sources to buildext"
       },
       {
         "command": "dev.linglong.extension.build",
@@ -48,10 +52,6 @@
       {
         "fileMatch": "linglong.yaml",
         "url": "./schemas/linglong.json"
-      },
-      {
-        "fileMatch": "linglong.yaml",
-        "url": "./schemas/fields.json"
       }
     ],
     "snippets": [
@@ -69,7 +69,17 @@
           "source.yaml"
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "linglong",
+      "properties": {
+        "linglong.gen_deb_source.skip": {
+          "type": "boolean",
+          "default": false,
+          "description": "跳过base和runtime已存在的包，该功能依赖ll-builder"
+        }
+      }
+    }
   },
   "scripts": {
     "postcompile": "yarn tools:amd64; yarn tools:arm64",

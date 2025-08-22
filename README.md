@@ -16,9 +16,11 @@
 
 ## 代码片段
 
-封装了一些代码片段，方便编写linglong.yaml文件。
+封装了一些代码片段，方便编写 linglong.yaml 文件。在 linglong.yaml 中输入`ll`即可看到相关代码片段。
 
 ## 依赖更新
+
+**新版本 ll-builder 支持使用 buildext 安装依赖，优先考虑使用该功能，插件提供了 deb_source_to_buildext 命令，可将现有的 gen_deb_source 转为 buildext**
 
 在制作玲珑包时，如果 base 和 runtime 中缺少构建应用所需依赖，需要自己添加 deb 包，deb 包的依赖繁多，软件更新后下载地址又会失效，插件提供了一种自动更新 deb 包 依赖的功能。
 
@@ -30,7 +32,7 @@
 
 ### 第二步
 
-将 sources 字段放在 linglong.yaml 的最后，在 sources 最后添加以上注释(将 libical-dev, wget 替换称你自己想安装的软件包)
+将 sources 字段放在 linglong.yaml 的最后，在 sources 最后添加以下注释(将 libical-dev, wget 替换称你自己想安装的软件包)
 
 ```yaml
 build: |
@@ -94,10 +96,13 @@ build: |
 
 linglong: Build
 `ll-builder build`
+
 linglong: Run
 `ll-builder run`
+
 linglong: Export
 `ll-builder export`
+
 linglong: Offline Build
 `ll-builder build --offline`
 
