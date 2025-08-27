@@ -1,6 +1,6 @@
 {
   "linglong:version:v1": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:version",
     "body": [
       "version: '1'",
@@ -21,22 +21,62 @@
     ],
     "description": "a template"
   },
-  "linglong:gen_deb_source sources": {
-    "scope": "linglong.yaml",
-    "prefix": "ll:deb:src",
+  "linglong:package:app": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:package",
     "body": [
-      "# linglong:gen_deb_source sources amd64 https://mirrors.ustc.edu.cn/deepin/beige beige main community"
+      "package:",
+      "  id: $1",
+      "  name: your name",
+      "  version: 0.0.0.1",
+      "  kind: app",
+      "  description: |",
+      "    your description",
+      "",
+      "$2"
+    ],
+    "description": "a template"
+  },
+  "linglong:gen_deb_source:sources:23": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:source",
+    "body": [
+      "sources:",
+      "# linglong:gen_deb_source sources amd64 https://ci.deepin.com/repo/deepin/deepin-community/backup/rc2 beige main community",
+      "# linglong:gen_deb_source install $1"
     ],
     "description": "linglong gen deb source"
   },
-  "linglong:gen_deb_source install": {
-    "scope": "linglong.yaml",
-    "prefix": "ll:deb:in",
-    "body": ["# linglong:gen_deb_source install $1"],
+  "linglong:gen_deb_source:sources:25": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:source",
+    "body": [
+      "sources:",
+      "# linglong:gen_deb_source sources amd64 https://ci.deepin.com/repo/deepin/deepin-community/stable crimson/release main community",
+      "# linglong:gen_deb_source install $1"
+    ],
     "description": "linglong gen deb source"
   },
+  "linglong:gen_deb_source:install": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:in",
+    "body": ["# linglong:gen_deb_source install $1"],
+    "description": "install package"
+  },
+  "linglong:gen_deb_source:exclude": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:ex",
+    "body": ["# linglong:gen_deb_source exclude qemu-user-static $1"],
+    "description": "exclude package"
+  },
+  "linglong:gen_deb_source:install_dep": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:dep",
+    "body": ["bash ./install_dep linglong/sources \\$PREFIX $1"],
+    "description": "install depend"
+  },
   "linglong:gen_dsc_source sources": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:dsc:src",
     "body": [
       "# linglong:gen_dsc_source sources https://mirrors.ustc.edu.cn/deepin/beige beige main community"
@@ -44,13 +84,13 @@
     "description": "linglong gen deb source"
   },
   "linglong:gen_dsc_source install": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:dsc:in",
     "body": ["# linglong:gen_dsc_source install $1"],
     "description": "linglong gen deb source"
   },
   "linglong:buildext:apt": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:buildext:apt",
     "body": [
       "buildext:",
@@ -62,7 +102,7 @@
     ]
   },
   "linglong:base:20": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:base&runtime",
     "body": [
       "base: org.deepin.foundation/20.0.0",
@@ -70,7 +110,7 @@
     ]
   },
   "linglong:base:23": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:base&runtime",
     "body": [
       "base: org.deepin.base/23.1.0",
@@ -78,7 +118,7 @@
     ]
   },
   "linglong:base:25": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:base&runtime",
     "body": [
       "base: org.deepin.base/25.2.0",
@@ -86,7 +126,7 @@
     ]
   },
   "linglong:base:25:webengine": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:base&runtime",
     "body": [
       "base: org.deepin.base/25.2.0",
@@ -94,25 +134,25 @@
     ]
   },
   "linglong:build:cmake": {
-    "scope": "linglong.yaml",
+    "scope": "source.yaml.linglong",
     "prefix": "ll:build:cmake",
     "body": [
       "build: |",
       "  rm -rf build || true",
       "  mkdir build && cd build",
-      "  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ..",
+      "  cmake -DCMAKE_INSTALL_PREFIX=\\$PREFIX ..",
       "  make -j && make install"
     ]
   },
   "linglong:build:qmake": {
-    "scope": "linglong.yaml",
-    "prefix": "ll:build:cmake",
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:build:qmake",
     "body": [
       "build: |",
       "  rm -rf build || true",
       "  mkdir build && cd build",
-      "  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ..",
+      "  qmake ..",
       "  make -j && make install"
-    ]},
-  "linglong:build:appimage": {}
+    ]
+  }
 }

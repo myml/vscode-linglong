@@ -8,13 +8,25 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "engines": {
     "vscode": "^1.89.0"
   },
   "categories": [
     "Other"
   ],
+  "scripts": {
+    "postcompile": "yarn tools:amd64; yarn tools:arm64",
+    "tools:amd64": "GOARCH=amd64 go build -ldflags='-s -w' -o out/tools-x64 ./src/tools",
+    "tools:arm64": "GOARCH=arm64 go build -ldflags='-s -w' -o out/tools-arm64 ./src/tools",
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "package": "vsce package"
+  },
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
@@ -46,25 +58,28 @@
       {
         "command": "dev.linglong.extension.export",
         "title": "linglong: Export"
+      },
+      {
+        "command": "dev.linglong.extension.build.clean",
+        "title": "linglong: Clean build output"
       }
     ],
     "yamlValidation": [
       {
         "fileMatch": "linglong.yaml",
-        "url": "./schemas/linglong.json"
+        "url": "./schemas/linglong-schemas.json"
       }
     ],
     "snippets": [
       {
         "language": "yaml",
-        "fileMatch": "linglong.yaml",
-        "path": "./snippets/linglong.json"
+        "path": "./snippets/linglong-snippets.json"
       }
     ],
     "grammars": [
       {
         "scopeName": "source.yaml.linglong",
-        "path": "./syntaxes/linglong.json",
+        "path": "./syntaxes/linglong-syntaxes.json",
         "injectTo": [
           "source.yaml"
         ]
@@ -80,18 +95,6 @@
         }
       }
     }
-  },
-  "scripts": {
-    "postcompile": "yarn tools:amd64; yarn tools:arm64",
-    "tools:amd64": "GOARCH=amd64 go build -ldflags='-s -w' -o out/tools-x64 ./src/tools",
-    "tools:arm64": "GOARCH=arm64 go build -ldflags='-s -w' -o out/tools-arm64 ./src/tools",
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "yarn run compile && yarn run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test",
-    "package": "vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",

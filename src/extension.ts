@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 
+// 激活扩展
 export function activate(context: vscode.ExtensionContext) {
   // dsc source生成
   context.subscriptions.push(
@@ -46,6 +47,12 @@ export function activate(context: vscode.ExtensionContext) {
       builderOfflineBuild
     )
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "dev.linglong.extension.build.clean",
+      buildClean
+    )
+  );
 }
 
 async function builderOfflineBuild() {
@@ -72,6 +79,7 @@ async function builderExport() {
   terminal.show();
 }
 
+// 生成deb source
 export async function gen_deb_source() {
   const config = vscode.workspace.getConfiguration();
   const option = {
@@ -122,11 +130,12 @@ export async function gen_deb_source() {
         ].join(" ") + "\n"
       );
     }
-    terminal.sendText("bash -c 'rm linglong/sources/*.deb'");
+    terminal.sendText("bash -c 'rm linglong/sources/*.deb 2>/dev/null || true' ");
     terminal.show();
   }
 }
 
+// deb source转buildext
 export async function debsource2buildext(context: vscode.ExtensionContext) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
@@ -160,6 +169,7 @@ export async function debsource2buildext(context: vscode.ExtensionContext) {
   });
 }
 
+// 生成dsc source
 export async function gen_dsc_source(context: vscode.ExtensionContext) {
   console.log("run gen_dsc_source");
   const tempDir = os.tmpdir();
@@ -264,5 +274,20 @@ export async function gen_dsc_source(context: vscode.ExtensionContext) {
   );
   // 避免sed不触发vscode重新加载
   terminal.sendText(`echo "">> ${document.fileName}`);
+  terminal.show();
+}
+
+// 清理
+export async function buildClean() {
+  // 读取 linglong/output/binary/info.json
+  if (!vscode.workspace.workspaceFolders) {
+    return;
+  }
+  const infoJsonPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "linglong/output/binary/info.json");
+  const info = JSON.parse(await fs.readFile(infoJsonPath, "utf-8"));
+  const id = info.id
+  const terminal = vscode.window.createTerminal(`Ext Terminal`);
+  terminal.sendText(`ll-builder list | grep ${id} | xargs ll-builder remove`);
+  terminal.sendText(`rm -rf linglong`);
   terminal.show();
 }

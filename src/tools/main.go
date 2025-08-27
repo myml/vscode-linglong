@@ -41,13 +41,13 @@ func gen(linglongYaml string, packageList string) error {
 		return fmt.Errorf("read %s file: %w", linglongYaml, err)
 	}
 	lines := bytes.Split(data, []byte{'\n'})
-	var existsPkgs []string
+	var excludePkgs []string
 	if len(packageList) > 0 {
 		data, err = os.ReadFile(packageList)
 		if err != nil {
 			return fmt.Errorf("read %s file: %w", packageList, err)
 		}
-		existsPkgs = strings.Split(string(data), "\n")
+		excludePkgs = strings.Split(string(data), "\n")
 	}
 	var endLine int
 	var arch, repoUrl, codename string
@@ -60,9 +60,12 @@ func gen(linglongYaml string, packageList string) error {
 		}
 		endLine = index
 		line = line[len(GenDebSource):]
-		if strings.HasPrefix(line, "install") {
+		switch {
+		case strings.HasPrefix(line, "install"):
 			filter = append(filter, strings.ReplaceAll(line[len("install "):], ",", "|"))
-		} else if strings.HasPrefix(line, "sources") {
+		case strings.HasPrefix(line, "exclude"):
+			excludePkgs = append(excludePkgs, strings.ReplaceAll(line[len("exclude "):], ",", "|"))
+		case strings.HasPrefix(line, "sources"):
 			fields := strings.Fields(line)
 			if len(fields) < 3 {
 				continue
@@ -85,10 +88,10 @@ func gen(linglongYaml string, packageList string) error {
 	})
 	for i := range pkgs {
 		exists := false
-		for j := range existsPkgs {
+		for j := range excludePkgs {
 			pkgName := pkgs[i].File.Filename
 			pkgName = pkgName[:strings.Index(pkgName, "_")]
-			if strings.Contains(existsPkgs[j], pkgName) {
+			if strings.Contains(excludePkgs[j], pkgName) {
 				exists = true
 				break
 			}
