@@ -1,7 +1,8 @@
-import * as vscode from "vscode";
-import * as fs from "fs/promises";
-import * as os from "os";
-import * as path from "path";
+import vscode from "vscode";
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
+import yaml from "yaml";
 
 // 激活扩展
 export function activate(context: vscode.ExtensionContext) {
@@ -83,7 +84,8 @@ async function builderExport() {
 export async function gen_deb_source() {
   const config = vscode.workspace.getConfiguration();
   const option = {
-    skip: config.get("linglong.gen_deb_source.skip"),
+    skip: config.get("linglong.gen_deb_source.skip", false),
+    denylist: config.get("linglong.gen_deb_source.denylist", Array<string>()),
   };
 
   console.log("run gen_deb_source");
@@ -98,11 +100,15 @@ export async function gen_deb_source() {
     const installdepUrl =
       "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
     const terminal = vscode.window.createTerminal(`gen deb`);
-    terminal.sendText(` wget -N ${installdepUrl}\n`);
+    terminal.sendText(` wget -N ${installdepUrl}`);
     if (option.skip) {
       const randomDirName = Math.random().toString(36).substring(7);
       const dirpath = path.join(os.tmpdir(), randomDirName);
       await vscode.workspace.fs.createDirectory(vscode.Uri.file(dirpath));
+      fs.writeFile(
+        `${dirpath}/packages.list`,
+        option.denylist.map(v=>`Package: ${v}`).join("\n") + "\n\n"
+      );
       terminal.sendText(
         [
           " ll-builder",
@@ -112,25 +118,27 @@ export async function gen_deb_source() {
           "--",
           "sh",
           "-c",
-          `"cat /packages.list /runtime/packages.list > ${dirpath}/packages.list"`,
-        ].join(" ") + "\n"
+          `"cat /packages.list /runtime/packages.list >> ${dirpath}/packages.list"`,
+        ].join(" ")
       );
       terminal.sendText(
         [
           " " + ext.extensionPath + "/out/tools-" + process.arch,
           document.fileName,
           dirpath + "/packages.list",
-        ].join(" ") + "\n"
+        ].join(" ")
       );
     } else {
       terminal.sendText(
         [
           " " + ext.extensionPath + "/out/tools-" + process.arch,
           document.fileName,
-        ].join(" ") + "\n"
+        ].join(" ")
       );
     }
-    terminal.sendText("bash -c 'rm linglong/sources/*.deb 2>/dev/null || true' ");
+    terminal.sendText(
+      " bash -c 'rm linglong/sources/*.deb 2>/dev/null || true'"
+    );
     terminal.show();
   }
 }
@@ -279,15 +287,35 @@ export async function gen_dsc_source(context: vscode.ExtensionContext) {
 
 // 清理
 export async function buildClean() {
-  // 读取 linglong/output/binary/info.json
   if (!vscode.workspace.workspaceFolders) {
     return;
   }
-  const infoJsonPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "linglong/output/binary/info.json");
-  const info = JSON.parse(await fs.readFile(infoJsonPath, "utf-8"));
-  const id = info.id
+  // 获取当前文件路径
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showWarningMessage(
+      "未找到当前活动的编辑器，无法获取当前文件。"
+    );
+    return;
+  }
+  const document = editor.document;
+  const currentFilePath = document.uri.fsPath;
+  if (!currentFilePath.endsWith("linglong.yaml")) {
+    return;
+  }
+  // 读取yaml文件
+  // 读取当前yaml文件
+  let yamlContent: string;
+  try {
+    yamlContent = await fs.readFile(currentFilePath, "utf-8");
+  } catch (err) {
+    vscode.window.showErrorMessage("读取yaml文件失败: " + err);
+    return;
+  }
+  const project = yaml.parse(yamlContent);
+  const id = project.package.id;
   const terminal = vscode.window.createTerminal(`Ext Terminal`);
-  terminal.sendText(`ll-builder list | grep ${id} | xargs ll-builder remove`);
-  terminal.sendText(`rm -rf linglong`);
+  terminal.sendText(` rm -rf linglong`);
+  terminal.sendText(` ll-builder list | grep ${id} | xargs ll-builder remove`);
   terminal.show();
 }

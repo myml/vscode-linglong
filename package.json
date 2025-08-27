@@ -91,7 +91,12 @@
         "linglong.gen_deb_source.skip": {
           "type": "boolean",
           "default": false,
-          "description": "跳过base和runtime已存在的包，该功能依赖ll-builder"
+          "description": "生成deb source时跳过base和runtime已存在的包，该功能依赖ll-builder"
+        },
+        "linglong.gen_deb_source.denylist": {
+          "type": "array",
+          "default": ["qemu-user-static"],
+          "description": "生成deb source时跳过该列表中的包"
         }
       }
     }
@@ -111,5 +116,7 @@
   "extensionDependencies": [
     "redhat.vscode-yaml"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "yaml": "^2.8.1"
+  }
 }
