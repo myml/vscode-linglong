@@ -8,7 +8,7 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -95,7 +95,9 @@
         },
         "linglong.gen_deb_source.denylist": {
           "type": "array",
-          "default": ["qemu-user-static"],
+          "default": [
+            "qemu-user-static"
+          ],
           "description": "生成deb source时跳过该列表中的包"
         }
       }

@@ -100,15 +100,16 @@ export async function gen_deb_source() {
     const installdepUrl =
       "https://gitee.com/deepin-community/linglong-pica/raw/master/misc/libexec/linglong/builder/helper/install_dep";
     const terminal = vscode.window.createTerminal(`gen deb`);
-    terminal.sendText(` wget -N ${installdepUrl}`);
+    terminal.sendText(` wget -O install_dep ${installdepUrl}`);
+
+    const randomDirName = Math.random().toString(36).substring(7);
+    const dirpath = path.join(os.tmpdir(), randomDirName);
+    await vscode.workspace.fs.createDirectory(vscode.Uri.file(dirpath));
+    fs.writeFile(
+      `${dirpath}/packages.list`,
+      option.denylist.map((v) => `Package: ${v}`).join("\n") + "\n\n"
+    );
     if (option.skip) {
-      const randomDirName = Math.random().toString(36).substring(7);
-      const dirpath = path.join(os.tmpdir(), randomDirName);
-      await vscode.workspace.fs.createDirectory(vscode.Uri.file(dirpath));
-      fs.writeFile(
-        `${dirpath}/packages.list`,
-        option.denylist.map(v=>`Package: ${v}`).join("\n") + "\n\n"
-      );
       terminal.sendText(
         [
           " ll-builder",
@@ -121,21 +122,14 @@ export async function gen_deb_source() {
           `"cat /packages.list /runtime/packages.list >> ${dirpath}/packages.list"`,
         ].join(" ")
       );
-      terminal.sendText(
-        [
-          " " + ext.extensionPath + "/out/tools-" + process.arch,
-          document.fileName,
-          dirpath + "/packages.list",
-        ].join(" ")
-      );
-    } else {
-      terminal.sendText(
-        [
-          " " + ext.extensionPath + "/out/tools-" + process.arch,
-          document.fileName,
-        ].join(" ")
-      );
     }
+    terminal.sendText(
+      [
+        " " + ext.extensionPath + "/out/tools-" + process.arch,
+        document.fileName,
+        dirpath + "/packages.list",
+      ].join(" ")
+    );
     terminal.sendText(
       " bash -c 'rm linglong/sources/*.deb 2>/dev/null || true'"
     );
