@@ -8,7 +8,7 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -16,13 +16,13 @@
     "Other"
   ],
   "scripts": {
-    "postcompile": "yarn tools:amd64; yarn tools:arm64",
+    "postbuild": "yarn tools:amd64; yarn tools:arm64",
     "tools:amd64": "GOARCH=amd64 go build -ldflags='-s -w' -o out/tools-x64 ./src/tools",
     "tools:arm64": "GOARCH=arm64 go build -ldflags='-s -w' -o out/tools-arm64 ./src/tools",
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./",
+    "vscode:prepublish": "yarn run build",
+    "build": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "yarn run compile && yarn run lint",
+    "pretest": "yarn run build && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
     "package": "vsce package"
@@ -118,7 +118,5 @@
   "extensionDependencies": [
     "redhat.vscode-yaml"
   ],
-  "dependencies": {
-    "yaml": "^2.8.1"
-  }
+  "dependencies": {}
 }

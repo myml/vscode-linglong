@@ -2,7 +2,6 @@ import vscode from "vscode";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
-import yaml from "yaml";
 
 // 激活扩展
 export function activate(context: vscode.ExtensionContext) {
@@ -306,10 +305,73 @@ export async function buildClean() {
     vscode.window.showErrorMessage("读取yaml文件失败: " + err);
     return;
   }
-  const project = yaml.parse(yamlContent);
+
+  const project = yaml2json(yamlContent);
   const id = project.package.id;
+  const version = project.package.version;
   const terminal = vscode.window.createTerminal(`Ext Terminal`);
   terminal.sendText(` rm -rf linglong`);
-  terminal.sendText(` ll-builder list | grep ${id} | xargs ll-builder remove`);
+  terminal.sendText(` ll-builder list | grep ${id}/${version} | xargs ll-builder remove`);
   terminal.show();
+}
+
+// 一个简单的yaml转json函数（仅支持基本的key-value和嵌套，不支持复杂语法）
+function yaml2json(yamlStr: string): any {
+  const lines = yamlStr.split("\n");
+  const result: any = {};
+  const stack: any[] = [result];
+  const indentStack: number[] = [0];
+
+  for (let line of lines) {
+    // 跳过空行和注释
+    if (!line.trim() || line.trim().startsWith("#")) {
+      continue;
+    }
+    const indent = line.match(/^(\s*)/)![1].length;
+    const content = line.trim();
+    if (content.includes(":")) {
+      let [key, ...rest] = content.split(":");
+      key = key.trim();
+      let value: any = rest.join(":").trim();
+      // 处理缩进
+      while (indent < indentStack[indentStack.length - 1]) {
+        stack.pop();
+        indentStack.pop();
+      }
+      if (value === "") {
+        // 嵌套对象
+        stack[stack.length - 1][key] = {};
+        stack.push(stack[stack.length - 1][key]);
+        indentStack.push(indent + 2);
+      } else {
+        // 普通key-value
+        // 尝试转换为数字或布尔值
+        if (value === "true") {
+          value = true;
+        } else if (value === "false") {
+          value = false;
+        } else if (!isNaN(Number(value))) {
+          value = Number(value);
+        }
+        stack[stack.length - 1][key] = value;
+      }
+    } else if (content.startsWith("- ")) {
+      // 处理数组
+      let arrKey = Object.keys(stack[stack.length - 1]).pop();
+      if (!Array.isArray(stack[stack.length - 1][arrKey!])) {
+        stack[stack.length - 1][arrKey!] = [];
+      }
+      let value: any = content.slice(2).trim();
+      // 尝试转换为数字或布尔值
+      if (value === "true") {
+        value = true;
+      } else if (value === "false") {
+        value = false;
+      } else if (!isNaN(Number(value))) {
+        value = Number(value);
+      }
+      stack[stack.length - 1][arrKey!].push(value);
+    }
+  }
+  return result;
 }
