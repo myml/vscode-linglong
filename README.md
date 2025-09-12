@@ -18,6 +18,34 @@
 
 封装了一些代码片段，方便编写 linglong.yaml 文件。在 linglong.yaml 中输入`ll`即可看到相关代码片段。
 
+### 快捷指令列表
+
+#### 快速开始
+
+- `ll:version` - 生成一个可构建的 demo
+- `ll:package` - 快速生成包信息
+
+#### deb/dsc 源操作
+
+- `ll:deb:src` - 生成 deb 源
+- `ll:deb:in` - 安装 deb 包
+- `ll:deb:files` - 通过文件安装 deb 包
+- `ll:deb:exclude` - 排除 deb 包
+- `ll:deb:install_dep` - 在 build 中生成 install_dep 的调用
+
+#### 构建扩展
+
+- `ll:buildext:apt` - 添加 apt 构建扩展
+
+#### 基础运行时
+
+- `ll:base&runtime` - 添加基础运行时 (支持 20/23/25 版本)
+
+#### 构建命令
+
+- `ll:build:cmake` - 快速生成 CMake 构建命令
+- `ll:build:qmake` - 快速生成 QMake 构建命令
+
 ## 依赖更新
 
 **新版本 ll-builder 支持使用 buildext 安装依赖，优先考虑使用该功能，插件提供了 deb_source_to_buildext 命令，可将现有的 gen_deb_source 转为 buildext**

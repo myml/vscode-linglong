@@ -39,7 +39,7 @@
   },
   "linglong:gen_deb_source:sources:23": {
     "scope": "source.yaml.linglong",
-    "prefix": "ll:deb:source",
+    "prefix": "ll:deb:src",
     "body": [
       "sources:",
       "# linglong:gen_deb_source sources amd64 https://ci.deepin.com/repo/deepin/deepin-community/backup/rc2 beige main community",
@@ -49,7 +49,7 @@
   },
   "linglong:gen_deb_source:sources:25": {
     "scope": "source.yaml.linglong",
-    "prefix": "ll:deb:source",
+    "prefix": "ll:deb:src",
     "body": [
       "sources:",
       "# linglong:gen_deb_source sources amd64 https://ci.deepin.com/repo/deepin/deepin-community/stable crimson/release main community",
@@ -63,31 +63,23 @@
     "body": ["# linglong:gen_deb_source install $1"],
     "description": "install package"
   },
+  "linglong:gen_deb_source:files": {
+    "scope": "source.yaml.linglong",
+    "prefix": "ll:deb:files",
+    "body": ["# linglong:gen_deb_source files $1"],
+    "description": "install package by files"
+  },
   "linglong:gen_deb_source:exclude": {
     "scope": "source.yaml.linglong",
-    "prefix": "ll:deb:ex",
+    "prefix": "ll:deb:exclude",
     "body": ["# linglong:gen_deb_source exclude qemu-user-static $1"],
     "description": "exclude package"
   },
   "linglong:gen_deb_source:install_dep": {
     "scope": "source.yaml.linglong",
-    "prefix": "ll:deb:dep",
-    "body": ["bash ./install_dep linglong/sources \\$PREFIX $1"],
+    "prefix": "ll:deb:install_dep",
+    "body": ["bash ./install_dep linglong/sources \\$PREFIX"],
     "description": "install depend"
-  },
-  "linglong:gen_dsc_source sources": {
-    "scope": "source.yaml.linglong",
-    "prefix": "ll:dsc:src",
-    "body": [
-      "# linglong:gen_dsc_source sources https://mirrors.ustc.edu.cn/deepin/beige beige main community"
-    ],
-    "description": "linglong gen deb source"
-  },
-  "linglong:gen_dsc_source install": {
-    "scope": "source.yaml.linglong",
-    "prefix": "ll:dsc:in",
-    "body": ["# linglong:gen_dsc_source install $1"],
-    "description": "linglong gen deb source"
   },
   "linglong:buildext:apt": {
     "scope": "source.yaml.linglong",

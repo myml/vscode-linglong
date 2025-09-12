@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -52,7 +54,7 @@ func gen(linglongYaml string, packageList string) error {
 	var endLine int
 	var arch, repoUrl, codename string
 	var components, filter []string
-
+	var files []string
 	for index := range lines {
 		line := strings.TrimSpace(string(lines[index]))
 		if !strings.HasPrefix(line, GenDebSource) {
@@ -64,7 +66,9 @@ func gen(linglongYaml string, packageList string) error {
 		case strings.HasPrefix(line, "install"):
 			filter = append(filter, strings.ReplaceAll(line[len("install "):], ",", "|"))
 		case strings.HasPrefix(line, "exclude"):
-			excludePkgs = append(excludePkgs, strings.ReplaceAll(line[len("exclude "):], ",", "|"))
+			excludePkgs = append(excludePkgs, strings.Split(line[len("exclude "):], ",")...)
+		case strings.HasPrefix(line, "files"):
+			files = append(files, strings.Split(line[len("files "):], ",")...)
 		case strings.HasPrefix(line, "sources"):
 			fields := strings.Fields(line)
 			if len(fields) < 3 {
@@ -76,12 +80,26 @@ func gen(linglongYaml string, packageList string) error {
 			components = fields[4:]
 		}
 	}
+	lines = lines[:endLine+1]
 
+	for i := range files {
+		contents, err := getContents(arch, repoUrl, codename, components[i])
+		if err != nil {
+			return fmt.Errorf("get contents: %w", err)
+		}
+		for j := range contents {
+			if strings.HasSuffix(contents[j].Path, files[i]) {
+				filter = append(filter, contents[j].Package)
+				source := fmt.Sprintf("  ## Find %s in the %s package", files[i], contents[j].Package)
+				lines = append(lines, []byte(source))
+				break
+			}
+		}
+	}
 	pkgs, err := getPkg(arch, repoUrl, codename, components, strings.Join(filter, "|"))
 	if err != nil {
 		return err
 	}
-	lines = lines[:endLine+1]
 	sort.SliceStable(pkgs, func(i, j int) bool {
 		c := strings.Compare(pkgs[i].File.Filename, pkgs[j].File.Filename)
 		return c < 0
@@ -180,4 +198,48 @@ func getPkg(arch, repoURL, distribution string, components []string, filter stri
 	}
 	progress.Flush()
 	return queue, nil
+}
+
+type Content struct {
+	Path    string
+	Package string
+}
+
+func getContents(arch, repoURL, distribution, component string) ([]Content, error) {
+	progress := console.NewProgress()
+	progress.Start()
+	downloader := &DownloadWithCache{Downloader: http.NewDownloader(0, 1, progress)}
+	if !strings.HasSuffix(repoURL, "/") {
+		repoURL += "/"
+	}
+	u, err := url.Parse(repoURL)
+	if err != nil {
+		return nil, fmt.Errorf("parse repo url: %w", err)
+	}
+	var result []Content
+	// eg. dists/beige/main/Contents-amd64.bz2
+	path := fmt.Sprintf("dists/%s/%s/Contents-%s", distribution, component, arch)
+	r, f, err := http.DownloadTryCompression(context.Background(), downloader, u, path, nil, true)
+	if err != nil {
+		return nil, fmt.Errorf("download: %w", err)
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Split(line, "\t")
+		path := fields[0]
+		pkgs := fields[1]
+		if strings.Contains(pkgs, ",") {
+			pkgs = pkgs[:strings.Index(pkgs, ",")]
+		}
+		if strings.Contains(pkgs, "/") {
+			pkgs = pkgs[strings.Index(pkgs, "/")+1:]
+		}
+		result = append(result, Content{
+			Path:    path,
+			Package: pkgs,
+		})
+	}
+	return result, nil
 }
