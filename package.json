@@ -8,7 +8,7 @@
   },
   "icon": "logo.png",
   "description": "",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -16,16 +16,16 @@
     "Other"
   ],
   "scripts": {
-    "postbuild": "yarn tools:amd64; yarn tools:arm64",
-    "tools:amd64": "GOARCH=amd64 go build -ldflags='-s -w' -o out/tools-x64 ./src/tools",
-    "tools:arm64": "GOARCH=arm64 go build -ldflags='-s -w' -o out/tools-arm64 ./src/tools",
     "vscode:prepublish": "yarn run build",
     "build": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run build && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
-    "package": "vsce package"
+    "package:amd64": "GOARCH=amd64 go build -ldflags='-s -w' -o out/tools ./src/tools; vsce package --target=linux-x64",
+    "package:arm64": "GOARCH=arm64 go build -ldflags='-s -w' -o out/tools ./src/tools; vsce package --target=linux-arm64",
+    "prepackage": "rm -r out",
+    "package": "yarn package:amd64 && yarn package:arm64"
   },
   "activationEvents": [],
   "main": "./out/extension.js",

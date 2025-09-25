@@ -118,13 +118,13 @@ export async function gen_deb_source() {
           "--",
           "sh",
           "-c",
-          `"cat /packages.list /runtime/packages.list >> ${dirpath}/packages.list"`,
+          `'cat $(ls /packages.list /runtime/packages.list) >> ${dirpath}/packages.list'`,
         ].join(" ")
       );
     }
     terminal.sendText(
       [
-        " " + ext.extensionPath + "/out/tools-" + process.arch,
+        " " + ext.extensionPath + "/out/tools",
         document.fileName,
         dirpath + "/packages.list",
       ].join(" ")
@@ -311,7 +311,9 @@ export async function buildClean() {
   const version = project.package.version;
   const terminal = vscode.window.createTerminal(`Ext Terminal`);
   terminal.sendText(` rm -rf linglong`);
-  terminal.sendText(` ll-builder list | grep ${id}/${version} | xargs ll-builder remove`);
+  terminal.sendText(
+    ` ll-builder list | grep ${id}/${version} | xargs ll-builder remove`
+  );
   terminal.show();
 }
 
